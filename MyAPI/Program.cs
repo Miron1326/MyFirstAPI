@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using MyAPI.Models;
+
 namespace MyAPI
 {
     public class Program
@@ -6,10 +9,15 @@ namespace MyAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));//ложим AppDbContext в builder.Servises, из appsettings.json
+
             builder.Services.AddSingleton<ICounter, Counter>();//DI Singletone счетчик (интерфейс, класс интерфейса)
 
-            var app = builder.Build();
+            builder.Services.AddSwaggerGen();
 
+            var app = builder.Build();
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
 
 
@@ -34,6 +42,60 @@ namespace MyAPI
             }); //проверка
 
 
+     //получить предметы
+
+            app.MapGet("/inventory", async (AppDbContext db) =>
+            {
+                //ToListAsync - переводит SQL запрос в список C#
+                var items = await db.Items.ToListAsync();
+                return Results.Ok(items);
+            });
+
+
+
+     //добавить предмет
+
+            app.MapPost("/inventory", async (AppDbContext db, Item newItem) =>
+            {
+                db.Items.Add(newItem);
+                await db.SaveChangesAsync(); //Сохраняем изменения в таблице и базу данных
+                return Results.Created($"/inventory/{newItem}", newItem);
+            });
+
+
+     //удалить предмет
+
+            app.MapDelete("/inventory/{id}", async (AppDbContext db, int id) =>
+            {
+                var item = await db.Items.FindAsync(id);
+                if(item is null)
+                {
+                    return Results.NotFound("Предмет не найден");
+                }
+                db.Items.Remove(item);
+                
+                await db.SaveChangesAsync();
+                return Results.NoContent();
+            });
+
+     //полностью заменить предмет
+
+            app.MapPut("/inventory/{id}", async (AppDbContext db, int id, Item updatedItem) =>
+            {
+                var existingItem = await db.Items.FindAsync(id); //поиск по id
+                if(existingItem is null)
+                {
+                    return Results.NotFound($"Предмет с id {id} не найден");
+                }
+
+                existingItem.Name = updatedItem.Name;
+                existingItem.Quantity = updatedItem.Quantity;
+
+                await db.SaveChangesAsync();
+                return Results.Ok(existingItem);
+            });
+
+     //обычные серверы
 
             app.MapGet("/", (ICounter counter) =>
             {
