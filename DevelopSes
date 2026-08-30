@@ -32,6 +32,13 @@ ORM переводчик в .net
 7. Migration - 
 чертёж для базы данных для изменения. С EF Core{4}
 
-%1. APPL: СВОЙСТВА, ФУНКЦИИ -
+%1 NuGet команды (PowerShell)- 
+:dotnet add package ... - добавляет пакеты пр:
+1. cd путь к проекту (cd D:\Projects\MyAPI)
+  1. Microsoft.EntityFrameworkCore - EF Core {4}
+  2. Npgsql.EntityFrameworkCore.PostegreSQL - провайдер для PostegreSQL {3}
+  3. Microsoft.EntityFrameworkCore.Design - создания миграций из Командной строки {4, 7}
+
+%2. APPL: СВОЙСТВА, ФУНКЦИИ -
 :app.Use(...) - принимает middleware первым параметром, next вторым параметром.  Вызов так называемой станции
 :app.MapGet(...) - принимает запрос первым параметром и вторым параметром метод {энд поинт(endpoint)}
