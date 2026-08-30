@@ -1,3 +1,6 @@
+Важно, для лучшей удобности скачивать swagger и использовать его - {:Invoke-RestMethod - %2}
+
+
 1. Middleware -
 Смотрит кто пришел
 проверяет пароль
@@ -33,12 +36,39 @@ ORM переводчик в .net
 чертёж для базы данных для изменения. С EF Core{4}
 
 %1 NuGet команды (PowerShell)- 
-:dotnet add package ... - добавляет пакеты пр:
-1. cd путь к проекту (cd D:\Projects\MyAPI)
+ :dotnet add package ... - добавляет пакеты пр:
+ 1. cd путь к проекту (cd D:\Projects\MyAPI)
   1. Microsoft.EntityFrameworkCore - EF Core {4}
   2. Npgsql.EntityFrameworkCore.PostegreSQL - провайдер для PostegreSQL {3}
   3. Microsoft.EntityFrameworkCore.Design - создания миграций из Командной строки {4, 7}
 
-%2. APPL: СВОЙСТВА, ФУНКЦИИ -
-:app.Use(...) - принимает middleware первым параметром, next вторым параметром.  Вызов так называемой станции
-:app.MapGet(...) - принимает запрос первым параметром и вторым параметром метод {энд поинт(endpoint)}
+ : dotnet ef migrations add ... - EF Core {4} смотрит на класс предмета и создаёт папку Migrations с C# кодом который говорит создать табицу предмета используя appDbContext забирая Db данные
+  1. dotnet ef database update - создаёт базы данных  после подключения к postgre через appsetings.json
+
+ :Invoke-RestMethod - курьер несущий инструкцию туда и обратно ответ сервера, через HTTP к REST API
+  1.1Invoke-RestMethod -Method Post - Не просто прочитать и получить ответ а создать новый пост через app.MapPost(...) {%2} 
+  1.2Invoke-RestMethod -Method Post -Uri http://localhost:7076/inventory - всё тоже самое но с точным адресом
+  1.3Invoke-RestMethod -Method Post -Uri http://localhost:7076/inventory -ContentType "application/json" - говорим что тут данные в формате json
+  1.4Invoke-RestMethod -Method Post -Uri http://localhost:7076/inventory -ContentType "application/json" -Body '{"name" : "Меч", "quantity" : 1}' - Полный конечный метод который видит класс предмета миграции, 
+  к примеру Item, видит его св-ва и автоматически превращает json в реальный C# объект и передаёт его в метод MapPost
+
+! 2.1 скачать Swashbuckle.aspnetcore
+  2.2 builder.Services.AddSwaggerGen(); //До инициализации app
+      app.UseSwagger();
+      app.UseSwaggerUI();
+  2.3 перейти по https://localhost:7076/swagger после запуска сервера
+  2.4 появился интерфейс из кнопок которые мы сделали используя Map. нажимает Try it out и execute если get. Нажимает try it out и пишем в requested body json нового предмета к примеру - {"name" : "Меч", "quantity" : 1}.
+  Try it out и номер id если delete
+
+    3. общие свойства CRUD - 
+        1.Get - получить элемент/ы
+        2.Post - добавить элемент/ы
+        3.Delete - удалить элемент/ы
+        4.Put - полностью заменить элемент/ы
+        5.Patch - частично заменить элемент/ы
+            для них для всех нужен SaveChangesAsync
+
+%2. APP: СВОЙСТВА, ФУНКЦИИ -
+ :app.Use(...) - принимает middleware первым параметром, next вторым параметром.  Вызов так называемой станции
+ :app.MapGet(...) - принимает запрос первым параметром и вторым параметром метод {энд поинт(endpoint)}. вызов но через команду
+ :app.MapPost(...) - для поста в Migration {7} принимает запрос первым параметром и вторым параметром метод
